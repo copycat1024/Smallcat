@@ -4,9 +4,9 @@ from rest_framework import serializers
 class TeacherSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
 		model = Teacher
-		fields = ('pk', 'forename', 'surname', 'username', 'email')
+		fields = '__all__'
 
 class CourseSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
 		model = Course
-		fields = ('pk', 'name', 'group', 'teacher')
+		fields = '__all__'

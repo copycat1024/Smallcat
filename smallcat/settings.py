@@ -132,4 +132,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAdminUser',
     ],
     'PAGE_SIZE': None,
+    'DEFAULT_METADATA_CLASS': 'mainapp.meta.GetMetadata',
 }
+

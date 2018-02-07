@@ -16,8 +16,9 @@ function showList(){
 	top_ele.innerHTML = "";
 
 	var m = "";
-	objMC.tables.forEach((t,i) => {
-		m += wrap("li", up1(t.name), "onclick='showTable("+i+");'");
+	
+	_.each(objMain.tables, t => {
+		m += wrap("li", up1(t.name), "onclick='showTable("+t.url+");'");
 	});
 	main_ele.innerHTML = "<p>Table list:</p>" + wrap("ul", m);
 }

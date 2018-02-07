@@ -4,6 +4,30 @@ requestREST("GET", "/course", {}, function(request){
 });
 */
 
+REST = {
+	"request" : (method, url, data) => promiseREST(method, url, data),
+};
+
+function promiseREST(method, url, data){
+	return new Promise( (resolve, reject) => {
+		var xhr = new XMLHttpRequest();
+		xhr.open(method, url, true);
+		xhr.setRequestHeader("X-CSRFToken", readCookie("csrftoken"));
+		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+		xhr.onload = function(){
+			if (this.status >= 200 && this.status < 300) {
+				resolve(this);
+			} else {
+				reject(this);
+			}
+		};
+		xhr.onerror = function(){
+			reject(this);
+		};
+		xhr.send(JSON.stringify(data));
+	});
+}
+
 function requestREST(method, url, data, callback){
 	var request = new XMLHttpRequest();
 	request.open(method, url, true);
