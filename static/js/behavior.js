@@ -1,5 +1,5 @@
-function showEditTable(num){
-	requestREST("GET", "/"+objMC.tables[num].name+"/", {}, function(request){
+function showEditTable(url){
+	requestREST("GET", url, {}, function(request){
 		var data = JSON.parse(request.responseText);
 		makeEditTable(data, objMC.tables[num], num);
 	});
@@ -13,12 +13,13 @@ function showTable(num){
 }
 
 function showList(){
-	top_ele.innerHTML = "";
+	DOM("top").clear();
+	DOM("main").add("p")
+	.text("Table list:");
 
-	var m = "";
-	
-	_.each(objMain.tables, t => {
-		m += wrap("li", up1(t.name), "onclick='showTable("+t.url+");'");
+	_.each(MAIN.tables, t => {
+		DOM("main").add("li")
+		.text(up1(t.name))
+		.click(e => showTable(t.url));
 	});
-	main_ele.innerHTML = "<p>Table list:</p>" + wrap("ul", m);
 }

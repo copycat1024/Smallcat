@@ -16,7 +16,7 @@ function promiseREST(method, url, data){
 		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 		xhr.onload = function(){
 			if (this.status >= 200 && this.status < 300) {
-				resolve(this);
+				resolve(JSON.parse(this.responseText));
 			} else {
 				reject(this);
 			}
