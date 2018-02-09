@@ -4,13 +4,15 @@ requestREST("GET", "/course", {}, function(request){
 });
 */
 
-REST = {
-	"request" : (method, url, data) => promiseREST(method, url, data),
-};
+REST = {};
+
+REST.request = (method, url, data) => promiseREST(method, url, data);
+REST.get     = (url)               => promiseREST("GET", url, {});
+REST.options = (url)               => promiseREST("OPTIONS", url, {});
 
 function promiseREST(method, url, data){
+	var xhr = new XMLHttpRequest();
 	return new Promise( (resolve, reject) => {
-		var xhr = new XMLHttpRequest();
 		xhr.open(method, url, true);
 		xhr.setRequestHeader("X-CSRFToken", readCookie("csrftoken"));
 		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
@@ -25,6 +27,10 @@ function promiseREST(method, url, data){
 			reject(this);
 		};
 		xhr.send(JSON.stringify(data));
+	}).catch(xhr => {
+		if (REST.handleError){
+			REST.handleError(xhr);
+		}
 	});
 }
 

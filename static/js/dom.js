@@ -17,11 +17,11 @@ _DOM.setAttribute = (de, name, value) => {
 }
 
 _DOM.bindEventListener = (de, type, listener) => {
-	de.ele.addEventListener(type, listener);
+	de.ele.addEventListener(type, listener, false);
 	return de;
 }
 
-_DOM.gebi = function(id){
+_DOM.getElementByID = function(id){
 	return new _de(document.getElementById(id));
 }
 
@@ -41,7 +41,7 @@ function _de(ele){
 
 function DOM(id){
 	if (_DOM.ele[id]==null){
-		_DOM.ele[id] = _DOM.gebi(id);
+		_DOM.ele[id] = _DOM.getElementByID(id);
 	}
 	return _DOM.ele[id];
 }

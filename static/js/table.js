@@ -1,10 +1,10 @@
-function makeTable(data, num){
+function makeTable(opt, data){
 	var keys = Object.keys(data[0]);
-	rmpk(keys);
 
-	top_ele.innerHTML = "<button onclick='showList();'>Back</button>";
-	top_ele.innerHTML += "<button onclick='showEditTable("+num+");'>Edit</button>";
-	
+	dw(opt);
+	dw(data);
+	var main_ele = DOM("main").ele;
+
 	main_ele.innerHTML = frameTable;
 	var thead = gebi("thead");
 	var tbody = gebi("tbody");
