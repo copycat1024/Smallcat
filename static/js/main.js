@@ -1,5 +1,5 @@
 objMC = {
-	"url"    : "http://localhost:8000/",
+	"url"    : "http://copycat1024.pythonanywhere.com/",
 	"tables" : [
 		{
 			"name" : "teacher",
