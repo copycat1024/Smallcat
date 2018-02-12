@@ -10,6 +10,8 @@ REST.request = (method, url, data) => promiseREST(method, url, data);
 REST.get     = (url)               => promiseREST("GET", url, {});
 REST.options = (url)               => promiseREST("OPTIONS", url, {});
 
+REST.handleError = xhr => console.log("REST error!");
+
 function promiseREST(method, url, data){
 	var xhr = new XMLHttpRequest();
 	return new Promise( (resolve, reject) => {
@@ -28,9 +30,7 @@ function promiseREST(method, url, data){
 		};
 		xhr.send(JSON.stringify(data));
 	}).catch(xhr => {
-		if (REST.handleError){
-			REST.handleError(xhr);
-		}
+		REST.handleError(xhr);
 	});
 }
 
@@ -46,7 +46,7 @@ function requestREST(method, url, data, callback){
 	};
 	request.send(JSON.stringify(data));
 }
- 
+
 function readCookie(name) {
 	var nameEQ = encodeURIComponent(name) + "=";
 	var ca = document.cookie.split(';');

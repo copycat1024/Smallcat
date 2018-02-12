@@ -1,48 +1,90 @@
 var _DOM = {"ele" : {}};
 
-_DOM.textEle = (de, txt) => {
-	de.ele.innerHTML = txt;
-	return de;
-}
-
-_DOM.addChild = (de, tag) => {
-	var ele = document.createElement(tag);
-	de.ele.appendChild(ele);
-	return new _de(ele);
-}
-
-_DOM.setAttribute = (de, name, value) => {
-	de.ele.setAttribute(name, value);
-	return de;
-}
-
-_DOM.bindEventListener = (de, type, listener) => {
-	de.ele.addEventListener(type, listener, false);
-	return de;
-}
-
-_DOM.getElementByID = function(id){
-	return new _de(document.getElementById(id));
-}
-
-// DOM element
-function _de(ele){
-	this.ele = ele;
-	this.id  = ele.id;
-	this.clear = () => _DOM.textEle(this, "");
-	this.text = txt => _DOM.textEle(this, txt);
-	this.add  = tag => _DOM.addChild(this, tag);
-	this.sid  = val => _DOM.setAttribute(this, "id", val);
-	this.scl  = val => _DOM.setAttribute(this, "class", val);
-	this.attr = (n,v) => _DOM.setAttribute(this, n, v);
-	this.bind = (t,l) => _DOM.bindEventListener(this, t, l);
-	this.click = l    => _DOM.bindEventListener(this, "click", l);
-}
+// DOM Element
 
 function DOM(id){
-	if (_DOM.ele[id]==null){
-		_DOM.ele[id] = _DOM.getElementByID(id);
-	}
-	return _DOM.ele[id];
-}
+	function Element(input_node){
+		this.node = input_node;
+		var node = this.node;
 
+		this.prop  = function(name, value){
+			if (value === undefined){
+				return node[name];
+			} else {
+				node[name] = value;
+				return this;
+			}
+		};
+
+		this.text = function(txt){
+			return this.prop("innerHTML", txt);
+		};
+
+		this.id = function(id){
+			return this.prop("id", id);
+		};
+
+		this.editable = function(flag){
+			return this.prop("contentEditable", flag);
+		};
+
+		this.attr = function(name, value){
+			if (value === undefined){
+				return node.getAttribute(name);
+			} else {
+				node.setAttribute(name, value);
+				return this;
+			}
+		};
+
+		this.cls  = function(value){
+			return this.attr("class", value);
+		};
+
+		this.bind = function(type, listener){
+			var handler = e => listener(this, e);
+			node.addEventListener(type, handler, false);
+			return this;
+		};
+
+		this.click = function(listener){
+			return this.bind("click", listener);
+		};
+
+		this.clear = function(){
+			var clone = node.cloneNode(false);
+			node.parentNode.replaceChild(clone, node);
+			return new Element(clone);
+		};
+
+		this.add  = function(tag){
+			var child = document.createElement(tag);
+			node.appendChild(child);
+			return new Element(child);
+		};
+
+		this.parent = function(){
+			return new Element(node.parentNode);
+		}
+
+		this.focus = function(){
+			node.focus();
+			return this;
+		}
+
+		this.remove = function(){
+			node.parentNode.removeChild(node);
+			return null;
+		}
+	}
+
+	var getElementByID = id => new Element(document.getElementById(id));
+
+	if (DOM.cache == null) DOM.cache = {};
+	if (DOM.cache[id] == null || DOM.cache[id].offsetParent == null){
+		DOM.cache[id] = getElementByID(id);
+	} else {
+		alert("Cached "+id);
+	}
+	return DOM.cache[id];
+}
