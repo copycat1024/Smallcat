@@ -1,3 +1,38 @@
+var EDIT_R = {};
+
+EDIT_R.send = queue => {
+	dw(queue);
+	
+	var url = TABLE_M[TABLE_V.k].url;
+	var q = new RESTQ();
+	_.map(queue, (value, key) => {
+		if (value == "add"){
+			q.add(key, EDIT_R.add(key, url));
+//			EDIT_R.add(key, url);
+		}
+	});
+	q.run(d => dw(d));
+}
+
+EDIT_R.add = (key, url) => {
+	var clean = str => str.substring(0, str.length - 4);
+	var data = {};
+	var i;
+	var key_list = EDIT_M.meta.keys;
+	var pk = EDIT_M.meta.pk;
+	for (i=0; i<key_list.length; i++){
+		var cell = DOM("bd_"+key+"_"+i);
+		if (i == pk){
+			data.url = url+key+"/";
+		} else {
+			data[key_list[i]] = cell.text();
+		}
+	}
+	dw(data);
+	dw(url+key+"/");
+	return REST.add(url, data);
+}
+
 function sendEditRequest(addList, editList){
 	var updateList = [];
 	var deleteList = [];

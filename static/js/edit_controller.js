@@ -12,7 +12,7 @@ EDIT_C.cancel = () => {
 };
 
 EDIT_C.save = () => {
-	dw(EDIT_M.reduce());
+	EDIT_R.send(EDIT_M.reduce());
 }
 
 EDIT_C.handler.input_start = e => {

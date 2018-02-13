@@ -9,8 +9,12 @@ REST = {};
 REST.request = (method, url, data) => promiseREST(method, url, data);
 REST.get     = (url)               => promiseREST("GET", url, {});
 REST.options = (url)               => promiseREST("OPTIONS", url, {});
+REST.add     = (url, data)         => promiseREST("POST", url, data);
 
-REST.handleError = xhr => console.log("REST error!");
+REST.handleError = xhr => {
+	console.log("REST error!")
+	console.log(xhr.responseText);
+};
 
 function promiseREST(method, url, data){
 	var xhr = new XMLHttpRequest();
