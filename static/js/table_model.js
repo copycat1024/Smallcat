@@ -1,57 +1,75 @@
 TABLE_M = {};
 
 TABLE_M._init = function(data){
-	function Table(k, url){
+	function Table(name, url){
+		this.name = name;
 		this.url = url;
-		this.name = k;
 		this.loaded = false;
 
 		this.load = function(result){
-			this.meta = this._clean_meta(result.meta);
-			this.data = this._clean_data(result.data, this.meta);
+			this.loadMeta(result.meta.table);
+			this.loadData(result.data);
 			this.loaded = true;
 			return this.name;
 		}
 
-		this._clean_meta = data => {
-			res = {"keys" : [], "type" : [], "relation" : []};
-			_.map(data.table.fields, f => {
-				res.keys.push(f.name);
-				res.type.push(f.type);
-				if (f.is_relation)
-					res.relation.push(res.keys.length-1);
+		this.loadMeta = function(meta){
+			this.meta = meta;
+			this.meta.cols = [];
+			_.map(meta.fields, (f, k) => {
+				this.meta.cols.push(k);
 			});
-			res.pk = _.indexOf(res.keys, data.table.pk);
-			return res;
 		}
 
-		this._clean_data = (data, meta) => {
-			res = [];
+		// Must have load metadata before calling this function
+		this.loadData = function(data){
+			this.data = [];
+			this.pk   = [];
+			
 			_.each(data, row => {
 				r = [];
-				for (i=0; i<meta.keys.length; i++){
-					if (i == meta.pk){
-						r.push(this._key_from_url(row.url));
-					} else if (meta.relation.includes(i)) {
-						r.push(this._key_from_url(row[meta.keys[i]]));
-					} else {
-						r.push(row[meta.keys[i]]);
-					}
-				}
-				res.push(r);
+				_.each(this.meta.cols, col =>
+					r.push(row[col])
+				)
+				this.data.push(r);
+				this.pk.push(row[this.meta.pk]);
 			});
-			return res;
 		}
 
-		this._key_from_url = str => {
-			var l = str.split("/");
-			return l[l.length-2];
-		};
+		// return collumn name based on index
+		this.getCollumn = function(index){
+			return this.meta.cols[index];
+		}
+
+		// return collumn metadata based on index
+		this.getMeta = function(index){
+			return this.meta.fields[this.getCollumn(index)];
+		}
+
+		// return the number of collumns in the table
+		this.getWidth = function(){
+			return this.meta.cols.length;
+		}
+
+		this.getHeight = function(){
+			return this.data.length;
+		}
+
+		// return if a field is primary key based on index
+		this.isPrimary = function(index){
+			return this.getCollumn(index) == this.meta.pk;
+		}
+
+		// return if a field is relation key based on index
+		this.isRelation = function(index){
+			col = this.getCollumn(index);
+			return this.fields[col].type == "field";
+		}
 	}
 
 	this._list = [];
-	_.map(data, (v,k) => {
-		this._list.push(k);
-		this[k] = new Table(k, v);
+	_.map(data, (url, name) => {
+		this._list.push(name);
+		this[name] = new Table(name, url);
 	});
 }

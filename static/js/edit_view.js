@@ -2,48 +2,62 @@ var EDIT_V = {};
 var EDIT = {};
 
 EDIT_V.init = function(){
-	this.last = "";
+	// Initialize property
+	this.height = TABLE_V.height;
 
 	// Setup add cells at footer
-	this._make_footer(EDIT_M.meta.keys);
+	this.makeFooter();
 
 	// Setup body input cells
-	_.each(TABLE_V.body, e => e.click(EDIT_C.handler.input_start).bind("blur", EDIT_C.handler.input_end));
+	_.each(TABLE_V.body, e => e.click(EDIT_I.handler.input_start).bind("blur", EDIT_I.handler.input_end));
 
 	// Setup delete button
-	_.each(TABLE_V.remove, e => e.text("X").click(EDIT_C.handler.remove));
+	_.each(TABLE_V.remove, e => e.text("X").click(EDIT_I.handler.remove));
 
 };
 
-EDIT_V._make_footer = function(keys){
-	var r = DOM("tfoot").add("tr");
-	for (i=0; i<keys.length; i++){
-		r.add("td")
-		.id("add_"+i)
-		.click(EDIT_C.handler.input_start)
-		.bind("blur", EDIT_C.handler.input_end);
-	}
-	r.add("td")
-	.cls("pad")
-	.text("Add")
-	.id("add_btn")
-	.click(EDIT_C.handler.add);
+EDIT_V.makeFooter = function(){
+	TABLE_V.makeRow(DOM("tfoot"), TABLE_V.width,
+		// data_callback
+		(col, ele) => {
+			ele.id("add_"+i)
+			   .click(EDIT_I.handler.input_start)
+			   .bind("blur", EDIT_I.handler.input_end);
+		},
+		// sidebar_callback
+		ele => {
+			ele.cls("pad")
+			   .text("Add")
+			   .id("add_btn")
+			   .click(EDIT_I.handler.add);
+		}
+	);
 };
 
-EDIT_V._make_row = (row, pk) => {
-	var r = DOM("tbody").add("tr");
-	for (i=0; i<row.length; i++){
-		var val = "";
-		r.add("td")
-		.text(row[i])
-		.id("bd_"+pk+"_"+i)
-		.click(EDIT_C.handler.input_start)
-		.bind("blur", EDIT_C.handler.input_end);
+EDIT_V.addRow = function(data){
+	var row = this.height;
+	this.height++;
 
+	TABLE_V.makeRow(DOM("tbody"), TABLE_V.width,
+		// data_callback
+		(col, ele) => {
+			ele.id("bd_"+row+"_"+col)
+			   .click(EDIT_I.handler.input_start)
+			   .bind("blur", EDIT_I.handler.input_end)
+			   .text(data[col]);
+		},
+		// sidebar_callback
+		ele => {
+			ele.text("X")
+			   .cls("remove")
+			   .id("rm_"+row)
+			   .click(EDIT_I.handler.remove);
+		}
+	);
+
+	for (i=0; i<TABLE_V.width; i++){
+		DOM("add_"+i).text("");
 	}
-	r.add("td")
-	.text("X")
-	.cls("pad")
-	.id("rm_"+pk)
-	.click(EDIT_C.handler.remove);
+
+	return row;
 };

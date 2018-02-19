@@ -1,15 +1,13 @@
 var EDIT_M = {};
 
 EDIT_M.init = function(){
-	this.meta = TABLE_M[TABLE_V.k].meta;
 	this.queue = [];
 }
 
-EDIT_M.edit = function(id, col, old_txt, new_txt){
+EDIT_M.edit = function(id, old_txt, new_txt){
 	this.queue.push({
 		"type" : "edit",
 		"id"   : id,
-		"col"  : col,
 		"old"  : old_txt,
 		"new"  : new_txt,
 	});
@@ -22,27 +20,35 @@ EDIT_M.remove = function(id){
 	});
 }
 
-EDIT_M.add = function(row, id){
+EDIT_M.add = function(row){
 	this.queue.push({
 		"type" : "add",
-		"id"   : id,
 		"row"  : row,
 	});
 }
 
 EDIT_M.reduce = function(){
+	var parse = (s, i) => s.split("_")[i];
 	var d = {};
-	_.each(EDIT_M.queue, q => {
-		if (d[q.id] == null){
-			d[q.id] = q.type;
+
+	_.each(this.queue, q => {
+		if (q.id){
+			q.row = parse(q.id, 1);
+		}
+	});
+
+	_.each(this.queue, q => {
+		if (d[q.row] == null){
+			if (q.type == "edit" && parse(q.id, 0) == "add") return 0;
+			d[q.row] = q.type;
 		} else if (q.type == "add") {
-			let org = d[q.id];
-			d[q.id] = "add";
-			if (org == "remove-edit") d[q.id] = "edit";
-			if (org == "remove") d[q.id] = "edit";
+			let org = d[q.row];
+			d[q.row] = "add";
+			if (org == "remove-edit") d[q.row] = "edit";
+			if (org == "remove") d[q.row] = "edit";
 		} else if (q.type == "remove") {
-			if (d[q.id] == "add")  d[q.id] = "remove-add";
-			if (d[q.id] == "edit") d[q.id] = "remove-edit";
+			if (d[q.row] == "add")  d[q.row] = "remove-add";
+			if (d[q.row] == "edit") d[q.row] = "remove-edit";
 		}
 	});
 	return d;

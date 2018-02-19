@@ -10,6 +10,8 @@ REST.request = (method, url, data) => promiseREST(method, url, data);
 REST.get     = (url)               => promiseREST("GET", url, {});
 REST.options = (url)               => promiseREST("OPTIONS", url, {});
 REST.add     = (url, data)         => promiseREST("POST", url, data);
+REST.remove  = (url)               => promiseREST("DELETE", url, {});
+REST.edit    = (url, data)         => promiseREST("PUT", url, data);
 
 REST.handleError = xhr => {
 	console.log("REST error!")
@@ -24,7 +26,11 @@ function promiseREST(method, url, data){
 		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 		xhr.onload = function(){
 			if (this.status >= 200 && this.status < 300) {
-				resolve(JSON.parse(this.responseText));
+				if (this.responseText){
+					resolve(JSON.parse(this.responseText));
+				} else {
+					resolve({});
+				}
 			} else {
 				reject(this);
 			}

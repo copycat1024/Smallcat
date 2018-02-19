@@ -1,154 +1,57 @@
 var EDIT_R = {};
 
+EDIT_R.init = function(){
+	this.table = TABLE_M[TABLE_V.name];
+}
+
 EDIT_R.send = queue => {
-	dw(queue);
-	
-	var url = TABLE_M[TABLE_V.k].url;
+	var url = EDIT_R.table.url;
 	var q = new RESTQ();
-	_.map(queue, (value, key) => {
+	_.map(queue, (value, row) => {
 		if (value == "add"){
-			q.add(key, EDIT_R.add(key, url));
-//			EDIT_R.add(key, url);
-		}
-	});
-	q.run(d => dw(d));
-}
-
-EDIT_R.add = (key, url) => {
-	var clean = str => str.substring(0, str.length - 4);
-	var data = {};
-	var i;
-	var key_list = EDIT_M.meta.keys;
-	var pk = EDIT_M.meta.pk;
-	for (i=0; i<key_list.length; i++){
-		var cell = DOM("bd_"+key+"_"+i);
-		if (i == pk){
-			data.url = url+key+"/";
+			q.add(row, EDIT_R.add(row, url));
+		} else if (value == "remove" || value == "remove-edit") {
+			q.add(row, EDIT_R.remove(row, url));			
+		} else if (value == "edit"){
+			q.add(row, EDIT_R.edit(row, url));
 		} else {
-			data[key_list[i]] = cell.text();
+			dw(value);
 		}
+	});
+	q.run()
+	.then(d => dw(d))
+	.then(d => TABLE_C.refreshTable());
+}
+
+EDIT_R.add = (row, url) => {
+	return REST.add(url, EDIT_R.serialize(row));
+}
+
+EDIT_R.remove = (row, url) => {
+	return REST.remove(url+EDIT_R.getPk(row)+"/");
+}
+
+EDIT_R.edit = (row, url) => {
+	var data = EDIT_R.serialize(row);
+	var old_pk = EDIT_R.getPk(row);
+	var new_pk = data[EDIT_R.table.meta.pk];
+	if (old_pk == new_pk){
+		return REST.edit(url+old_pk+"/", EDIT_R.serialize(row));
+	} else {
+		return REST.add(url, EDIT_R.serialize(row))
+		.then(() => REST.remove(url+old_pk+"/"));
 	}
-	dw(data);
-	dw(url+key+"/");
-	return REST.add(url, data);
 }
 
-function sendEditRequest(addList, editList){
-	var updateList = [];
-	var deleteList = [];
-
-	Object.keys(editList).forEach(function(k){
-		if (editList[k] == "update"){
-			updateList.push(k);
-		} else if (editList[k] == "delete") {
-			deleteList.push(k);			
-		}
-	});
-
-	var c = 0;
-	var d = 0;
+EDIT_R.serialize = row => {
+	var cols = EDIT_R.table.meta.cols;
 	var r = {};
-
-	if (addList.length > 0) d++;
-	if (updateList.length > 0) d++;
-	if (deleteList.length > 0) d++;
-
-	if (d == 0) finishRequest(r);
-
-	sendAddRequest(addList, res => {
-		dw(res);
-		c++;
-		r["add"] = res;
-		if (c == d) finishRequest(r);
-	});
-
-	sendUpdateRequest(updateList, res => {
-		dw(res);
-		c++;
-		r["update"] = res;
-		if (c == d) finishRequest(r);
-	});
-
-	sendDeleteRequest(deleteList, res => {
-		dw(res);
-		c++;
-		r["delete"] = res;
-		if (c == d) finishRequest(r);
-	});
+	var col = 0;
+	for (col = 0; col<cols.length; col++){
+		var cell = DOM("bd_"+row+"_"+col);
+		r[cols[col]] = cell.text();
+	}
+	return r;
 }
 
-function sendAddRequest(addList, callback){
-	var count = addList.length;
-	var done = 0;
-	var response = {};
-	addList.forEach(pk => {
-		var data = collectAddInput("add", pk);
-		if (objET.setPK){
-			data["pk"] = data[objET.setPK];
-		}
-		requestREST("POST", objET.url, data, request => {
-			dw(objET.url);
-			dw(request.responseText);
-			response[pk] = JSON.parse(request.responseText);
-			done++;
-			if (done == count){
-				var res = {};
-				Object.keys(response).filter(k=>!(response[k].pk)).forEach(k=>res[k]=response[k]);
-				callback(res);
-			}
-		});
-	});
-}
-
-function sendDeleteRequest(deleteList, callback){
-	var count = deleteList.length;
-	var done = 0;
-	var response = {};
-	deleteList.forEach(pk => {
-		requestREST("DELETE", objET.url+pk+"/", {}, request => {
-			response[pk] = request.responseText;
-			done++;
-			if (done == count) callback(response);
-		});
-	});
-}
-
-function sendUpdateRequest(updateList, callback){
-	var count = updateList.length;
-	var done = 0;
-	var response = {};
-	updateList.forEach(pk => {
-		var data = collectUpdateInput("item", pk);
-		if (objET.setPK){
-			data["pk"] = data[objET.setPK];
-		}
-		requestREST("PUT", objET.url+pk+"/", data, request => {
-			response[pk] = JSON.parse(request.responseText);
-			done++;
-			if (done == count){
-				var res = {};
-				Object.keys(response).filter(k=>!(response[k].pk)).forEach(k=>res[k]=response[k]);
-				callback(res);
-			}
-		});
-	});
-}
-
-function collectAddInput(type, pk){
-	var data = {};
-	objET.keys.forEach(k => {data[k] = gife(type+"_"+k+"_"+pk)});
-	objET.linkKeys.forEach(k => {data[k] = "http://localhost:8000/"+k+"/"+data[k]+"/"});
-	return data;
-}
-
-function collectUpdateInput(type, pk){
-	var data = {};
-	objET.keys.forEach(k => {data[k] = gebi(type+"_"+k+"_"+pk).innerText});
-	objET.linkKeys.forEach(k => {data[k] = "http://localhost:8000/"+k+"/"+data[k]+"/"});
-	return data;
-}
-
-function finishRequest(res){
-	dw(res);
-	showTable(objET.num);
-}
+EDIT_R.getPk = row => EDIT_R.table.pk[row];

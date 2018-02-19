@@ -21,18 +21,10 @@ MAIN.showList = function(){
 }
 
 MAIN.showTable = function(k){
-	var t = DOM("top").clear();
-	t.add("button").text("Back").click(MAIN.showList);
-	t.add("button").text("Edit").click(MAIN.enableEdit);
-
 	TABLE_C.showTable(k);
 }
 
 MAIN.enableEdit = function(){
-	var t = DOM("top").clear();
-	t.add("button").text("Save").click(EDIT_C.save);
-	t.add("button").text("Cancel").click(EDIT_C.cancel);
-
 	EDIT_C.enable();
 }
 
