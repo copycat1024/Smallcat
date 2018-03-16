@@ -37,8 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-	'mainapp',
+	'rest_framework',
+	'smallcat',
+	'coreapp',
 ]
 
 MIDDLEWARE = [
@@ -82,6 +83,17 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+	# 'default': {
+	# 'ENGINE': 'django.db.backends.mysql',
+	# 'NAME': 'e1601116_vamk',
+	# 'USER': 'e1601116',
+	# 'PASSWORD': '',
+	# 'HOST': 'mysql.cc.puv.fi',
+	# 'PORT': '3306', 
+	# }
+# }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -123,15 +135,16 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
 	os.path.join(BASE_DIR, "static"),
+	os.path.join(BASE_DIR, "smallcat/static"),
 ]
 
 # REST setting
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAdminUser',
+#        'rest_framework.permissions.IsAdminUser',
     ],
     'PAGE_SIZE': None,
-    'DEFAULT_METADATA_CLASS': 'mainapp.meta.GetMetadata',
+    'DEFAULT_METADATA_CLASS': 'smallcat.meta.GetMetadata',
 }
 

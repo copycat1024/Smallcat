@@ -1,4 +1,5 @@
-"""smallcat URL Configuration
+"""
+vamk_management URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/1.11/topics/http/urls/
@@ -14,14 +15,10 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url, include
-from rest_framework import routers
-from mainapp import views
 from django.conf.urls.static import static
 from django.conf import settings
 
-router = routers.DefaultRouter()
-router.register(r'teacher', views.TeacherViewSet)
-router.register(r'course', views.CourseViewSet)
+from coreapp.router import router
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
